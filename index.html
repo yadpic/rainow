@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quick rain check for Johor Bahru - Know before you ride">
+    <title>Rain Check - Johor Bahru</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .location {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .temperature {
+            font-size: 48px;
+            font-weight: 600;
+            color: #333;
+            margin: 0.5rem 0;
+        }
+
+        .condition {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 2rem;
+            text-transform: capitalize;
+        }
+
+        .rain-status-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .rain-icon {
+            font-size: 50px;
+            line-height: 1;
+        }
+
+        .rain-status-text {
+            text-align: left;
+        }
+
+        .rain-status-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .rain-status-answer {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .rain-status-answer.raining {
+            color: #e74c3c;
+        }
+
+        .rain-status-answer.not-raining {
+            color: #27ae60;
+        }
+
+        .forecast-title {
+            font-size: 12px;
+            color: #888;
+            margin: 1.5rem 0 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .forecast-item {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+
+        .forecast-time {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .forecast-chance {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .refresh-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #f8f9fa;
+            border-color: #ccc;
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.98);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .last-update {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #c33;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .temperature {
+                font-size: 40px;
+            }
+
+            .rain-status-box {
+                padding: 1.25rem;
+            }
+
+            .rain-icon {
+                font-size: 40px;
+            }
+
+            .rain-status-answer {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="location" id="location">Johor Bahru, Malaysia</div>
+        <div class="temperature" id="temp">--°C</div>
+        <div class="condition" id="condition">Loading...</div>
+
+        <div class="rain-status-box">
+            <div class="rain-icon" id="rainIcon">☁️</div>
+            <div class="rain-status-text">
+                <div class="rain-status-label">Is it raining now?</div>
+                <div class="rain-status-answer loading" id="rainStatus">Checking...</div>
+            </div>
+        </div>
+
+        <div class="forecast-title">Next 2 hours forecast</div>
+        <div class="forecast-grid">
+            <div class="forecast-item">
+                <div class="forecast-time">+1 hour</div>
+                <div class="forecast-chance" id="forecast1">--%</div>
+            </div>
+            <div class="forecast-item">
+                <div class="forecast-time">+2 hours</div>
+                <div class="forecast-chance" id="forecast2">--%</div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <button class="refresh-btn" id="refreshBtn">Refresh Now</button>
+
+        <div class="last-update">
+            Last updated: <span id="lastUpdate">just now</span>
+        </div>
+    </div>
+
+    <script>
+        const iconMap = {
+            'Clear': '☀️',
+            'Clouds': '☁️',
+            'Rain': '🌧️',
+            'Drizzle': '🌦️',
+            'Thunderstorm': '⛈️',
+            'Snow': '❄️',
+            'Mist': '🌫️',
+            'Smoke': '💨',
+            'Haze': '🌫️'
+        };
+
+        let userLat = null;
+        let userLon = null;
+
+        // Get user's location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLat = position.coords.latitude;
+                        userLon = position.coords.longitude;
+                        console.log(`Location: ${userLat}, ${userLon}`);
+                        fetchWeather();
+                    },
+                    error => {
+                        console.warn('Location access denied, using default location');
+                        // If location denied, use Johor Bahru as fallback
+                        userLat = 1.4854;
+                        userLon = 103.7618;
+                        fetchWeather();
+                    }
+                );
+            } else {
+                // Fallback for browsers without geolocation
+                userLat = 1.4854;
+                userLon = 103.7618;
+                fetchWeather();
+            }
+        }
+
+        async function fetchWeather() {
+            try {
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.style.display = 'none';
+
+                // Pass location to backend
+                const params = new URLSearchParams();
+                if (userLat) params.append('lat', userLat);
+                if (userLon) params.append('lon', userLon);
+
+                const response = await fetch(`/api/weather?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch weather data');
+                }
+
+                const data = await response.json();
+
+                // Update location display
+                document.getElementById('location').textContent = data.location;
+
+                // Update temperature
+                document.getElementById('temp').textContent = `${data.temp}°C`;
+
+                // Update condition
+                document.getElementById('condition').textContent = data.description.charAt(0).toUpperCase() + data.description.slice(1);
+
+                // Update rain icon
+                document.getElementById('rainIcon').textContent = iconMap[data.condition] || '🌤️';
+
+                // Update rain status
+                const rainStatus = document.getElementById('rainStatus');
+                rainStatus.classList.remove('loading');
+                
+                if (data.isRaining) {
+                    rainStatus.textContent = '🌧️ YES! WEAR RAINCOAT';
+                    rainStatus.classList.add('raining');
+                    rainStatus.classList.remove('not-raining');
+                } else {
+                    rainStatus.textContent = '✓ NO RAIN YET';
+                    rainStatus.classList.add('not-raining');
+                    rainStatus.classList.remove('raining');
+                }
+
+                // Update forecast
+                document.getElementById('forecast1').textContent = `${data.forecast[0].rainChance}% chance`;
+                document.getElementById('forecast2').textContent = `${data.forecast[1].rainChance}% chance`;
+
+                // Update last update time
+                document.getElementById('lastUpdate').textContent = data.lastUpdate;
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('errorMessage').textContent = 'Unable to fetch weather. Please check your connection.';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('rainStatus').classList.remove('loading');
+            }
+        }
+
+        // Get location on page load
+        window.addEventListener('load', getLocation);
+
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            // Re-get location on refresh too
+            getLocation();
+            setTimeout(() => {
+                btn.disabled = false;
+            }, 1000);
+        });
+
+        // Auto-refresh every 15 minutes
+        setInterval(() => {
+            getLocation();
+        }, 15 * 60 * 1000);
+    </script>
+</body>
+</html>
