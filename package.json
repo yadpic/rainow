@@ -1,0 +1,25 @@
+{
+  "name": "rain-check-johor",
+  "version": "1.0.0",
+  "description": "Quick rain check app for Johor Bahru - Know before you ride your motorcycle",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "weather",
+    "rain",
+    "johor-bahru",
+    "malaysia"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
